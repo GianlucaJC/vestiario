@@ -139,7 +139,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				  </div>
 				  <div class="card-body">
 
-					<table id="example1" class="table table-bordered table-striped">
+					<table id="example1" class="display">
+	
 					  <thead>
 					  <tr>
 						<th>#</th>
@@ -157,6 +158,10 @@ scratch. This page gets rid of all links and provides the needed markup only.
 						<th>Cancella</th>
 						</tr>
 					  </thead>
+					  
+					  
+				  
+
 					  <tbody>
 						<?php
 						
@@ -231,6 +236,20 @@ scratch. This page gets rid of all links and provides the needed markup only.
 					  </tbody>
 					  <tfoot>
 
+						<th></th>
+						<th>Tipo Richiesta</th>
+						<?php if ($is_admin==1) {?>
+							<th>Reparto</th>
+							<th>Richiedente</th>
+						<?php } ?>
+						<th>Dipendente</th>
+						<th>Data</th>
+						<th>Stato</th>
+						<th></th>
+						<?php if ($is_admin==1) echo "<th></th>"; ?>
+						<th></th>
+					  
+
 					  </tfoot>
 					</table>
 					<input type='hidden' name='id_edit' id='id_edit' >
@@ -289,19 +308,15 @@ scratch. This page gets rid of all links and provides the needed markup only.
 <script src="../../plugins/jquery/jquery.min.js"></script>
 <!-- Bootstrap 4 -->
 <script src="../../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-<!-- DataTables  & Plugins -->
-<script src="../../plugins/datatables/jquery.dataTables.min.js"></script>
-<script src="../../plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
-<script src="../../plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
-<script src="../../plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
-<script src="../../plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
-<script src="../../plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
-<script src="../../plugins/jszip/jszip.min.js"></script>
-<script src="../../plugins/pdfmake/pdfmake.min.js"></script>
-<script src="../../plugins/pdfmake/vfs_fonts.js"></script>
-<script src="../../plugins/datatables-buttons/js/buttons.html5.min.js"></script>
-<script src="../../plugins/datatables-buttons/js/buttons.print.min.js"></script>
-<script src="../../plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+<!-- dipendenze DataTables !-->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/jszip-2.5.0/dt-1.12.1/b-2.2.3/b-colvis-2.2.3/b-html5-2.2.3/b-print-2.2.3/datatables.min.css"/>
+ 
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/v/dt/jszip-2.5.0/dt-1.12.1/b-2.2.3/b-colvis-2.2.3/b-html5-2.2.3/b-print-2.2.3/datatables.min.js"></script>
+<!-- fine DataTables !-->	
+
+
 
 <script src="../../dist/js/adminlte.min.js"></script>
 
@@ -313,10 +328,36 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
 <script>
   $(function () {
-    $("#example1").DataTable({
-		"responsive": true, "lengthChange": false, "autoWidth": false,
-		//, "colvis"
-		"buttons": ["copy", "csv", "excel", "pdf"],
+	  
+
+    $('#example1 tfoot th').each(function () {
+        var title = $(this).text();
+		if (title.length!=0) {
+			//+ title +
+			$(this).html('<input type="text" placeholder="Cerca" />');
+		}
+    });	
+    var table=$('#example1').DataTable({
+		"pageLength": 30,
+		order: [[0, 'desc']],
+		dom: 'Bfrtip',
+		buttons: [
+			'excel', 'pdf'
+		],		
+        initComplete: function () {
+            // Apply the search
+            this.api()
+                .columns()
+                .every(function () {
+                    var that = this;
+ 
+                    $('input', this.footer()).on('keyup change clear', function () {
+                        if (that.search() !== this.value) {
+                            that.search(this.value).draw();
+                        }
+                    });
+                });
+        },
 		"language": {
 			"lengthMenu": "Mostra _MENU_ richieste per pagina &nbsp&nbsp",
 			"zeroRecords": "Nessuna richiesta trovata",
@@ -331,8 +372,15 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				"previous":   "Precedente"
 			}
 		
-		}	  
-    }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
+		}	
+    });
+	var numRows = table.rows( ).count();	
+	html="Totale Richieste: "+numRows+"<hr>"
+	//$("#num_rec").html(html)
+	
+	  
+	  
+
     $('#example2').DataTable({
       "paging": true,
       "lengthChange": false,
