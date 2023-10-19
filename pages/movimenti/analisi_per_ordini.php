@@ -149,9 +149,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
                     <th>Prodotto</th>
 					<th>Taglia</th>
 					<th>Fornitore</th>
-					<th>Giacenza reale</th>
+					<th>Giacenza</th>
 					<th>Richieste in corso</th>
-					<th>Giacenza virtuale</th>
+
 					<th>Sottoscorta</th>
 					<th>Da ordinare</th>
                   </tr>
@@ -191,9 +191,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 											echo $qta_req;
 										echo "</a>";
 									echo "</td>";
-									echo "<td>";
-										if ($giacenza_impegno!="0")	echo $giacenza_impegno;
-									echo "</td>";
+
 									echo "<td>$sottoscorta</td>";
 									echo "<td>";
 										//echo "<input type='text' name='to_ord[]' class='ref' title='$sca'>";

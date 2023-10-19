@@ -120,7 +120,7 @@ class Main_Impegno
 			$id_ref=$id_ref_a[$sca];
 			$qta_impegno=$qta_impegno_a[$sca];
 			if (strlen($qta_impegno)!=0) {
-				$sql="UPDATE prodotti SET giacenza_impegno=giacenza_impegno-$qta_impegno WHERE id=$id_prodotto";
+				$sql="UPDATE prodotti SET giacenza=giacenza-$qta_impegno WHERE id=$id_prodotto";
 				$result=$this->conn->query($sql);
 				
 				$sql="SELECT storia storia_old FROM `richieste_items` WHERE id=$id_ref";
@@ -160,10 +160,13 @@ class Main_Impegno
 				VALUES 
 				($id_dipendente,'$filename', '$testo_doc', '$tipo_richiesta')";
 		$result=$this->conn->query($sql);
-		//dopo la firma-consegna, azzero gli impegni
 		$sql="UPDATE `richieste_items` SET qta_consegnata=qta_consegnata+qta_impegno,qta_impegno=0 WHERE id_richiesta=$id_ref";
 		
 		$result=$this->conn->query($sql);
+
+		/* vecchia procedura com impegni
+		// ora viene aggiornato subito la giacenza in save_impegni()
+		//dopo la firma-consegna, azzero gli impegni
 		
 		//Aggiornamento Giacenza REALE da giacenza virtuale
 		$sql="UPDATE `prodotti` p
@@ -171,6 +174,7 @@ class Main_Impegno
 				SET p.giacenza=p.giacenza_impegno
 				WHERE r.id_richiesta=$id_ref";
 		$result=$this->conn->query($sql);
+		*/
 		
 		//verifica se la richiesta è conclusa
 		$sql="SELECT codice_articolo,taglia,qta_consegnata, qta_richiesta FROM `richieste_items` WHERE id_richiesta=$id_ref";

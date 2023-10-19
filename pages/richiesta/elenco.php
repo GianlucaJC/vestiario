@@ -144,18 +144,17 @@ scratch. This page gets rid of all links and provides the needed markup only.
 					  <thead>
 					  <tr>
 						<th>#</th>
-						<th>Tipo Richiesta</th>
+						<th id='tipor'>Tipo Richiesta</th>
 						<?php if ($is_admin==1) {?>
 							<th>Reparto</th>
 							<th>Richiedente</th>
 						<?php } ?>
 						<th>Dipendente</th>
-						<th>Data</th>
-						<th>Stato</th>
-						<th>Modifica</th>
-						<?php if ($is_admin==1) echo "<th>Impegno</th>"; ?>
 						
-						<th>Cancella</th>
+						<th>DataEN</th>
+						<th>Stato</th>
+						<th>Operazioni</th>
+
 						</tr>
 					  </thead>
 					  
@@ -185,9 +184,10 @@ scratch. This page gets rid of all links and provides the needed markup only.
 										echo stripslashes($elenco[$sca]['dipendente']);
 									echo "</td>";
 									
+
 									echo "<td>";
-										echo date("d-m-Y",strtotime($elenco[$sca]['data_richiesta']));
-									echo "</td>";
+										echo date("Y-m-d",strtotime($elenco[$sca]['data_richiesta']));
+									echo "</td>";									
 									echo "</td>";
 
 									$stato=$elenco[$sca]['stato'];
@@ -208,28 +208,28 @@ scratch. This page gets rid of all links and provides the needed markup only.
 												echo "</a>";
 											}
 										}	
-									echo "</td>";
+									
 
 									if  ($is_admin==1) {
-										echo "<td style='text-align:center'>";
+										
 											echo "<a href='javascript:void(0)' onclick=\"impegno(".$elenco[$sca]['id'].")\">";
-												echo "<font size=5  color='green'><i class='far fa-calendar-check'></i></font>";
+												echo "<font size=5  color='green'><i class='far fa-calendar-check ml-2'></i></font>";
 											echo "</a>";
-										echo "</td>";
+										
 									}
 										
 									
-									echo "<td style='text-align:center'>";
+									
 										if ($stato!=3) {
 											if ($elenco[$sca]['id_richiedente']==$id_user || $is_admin==1) {
 												echo "<a href='javascript:void(0)'  onclick=\"elimina(".$elenco[$sca]['id'].")\">";
 													echo "<font size=5 color='red'>";
-														echo "<i class='fas fa-trash-alt'></i>";
+														echo "<i class='fas fa-trash-alt ml-2'></i>";
 													echo "</font>";
 												echo "</a>";
 											}
 										}
-									echo "</td>";
+									
 								echo "</tr>";
 							}
 						?>
@@ -243,11 +243,11 @@ scratch. This page gets rid of all links and provides the needed markup only.
 							<th>Richiedente</th>
 						<?php } ?>
 						<th>Dipendente</th>
-						<th>Data</th>
+
+						<th>DataEN</th>
 						<th>Stato</th>
 						<th></th>
-						<?php if ($is_admin==1) echo "<th></th>"; ?>
-						<th></th>
+
 					  
 
 					  </tfoot>
@@ -326,19 +326,37 @@ scratch. This page gets rid of all links and provides the needed markup only.
 	<script src="../../dist/js/demo.js"></script>
 <?php } ?>
 
+
+
 <script>
+
   $(function () {
 	  
 
+	
+
+	
     $('#example1 tfoot th').each(function () {
         var title = $(this).text();
+		id_campo=""
+		if (title=="Tipo Richiesta") id_campo="tipo_richiesta"
+		if (title=="Reparto") id_campo="reparto"
+		if (title=="Richiedente") id_campo="richiedente"
+		if (title=="Dipendente") id_campo="dipendente"
+		if (title=="Data") id_campo="data_ric"
+		if (title=="DataEN") id_campo="data_en"
+		if (title=="Stato") id_campo="stato_ric"
+
+
+
 		if (title.length!=0) {
 			//+ title +
-			$(this).html('<input type="text" placeholder="Cerca" />');
+			$(this).html('<input class="cerca" id="'+id_campo+'" type="text" placeholder="Cerca" />');
 		}
     });	
+	
     var table=$('#example1').DataTable({
-		"pageLength": 30,
+		"pageLength": 10,
 		order: [[0, 'desc']],
 		dom: 'Bfrtip',
 		buttons: [
@@ -378,7 +396,29 @@ scratch. This page gets rid of all links and provides the needed markup only.
 	html="Totale Richieste: "+numRows+"<hr>"
 	//$("#num_rec").html(html)
 	
-	  
+
+	if( typeof localStorage.tipo_richiesta != 'undefined' )  {
+		$("#tipo_richiesta").val(localStorage.tipo_richiesta)
+		$("#reparto").val(localStorage.reparto)
+		$("#richiedente").val(localStorage.richiedente)
+		$("#dipendente").val(localStorage.dipendente)
+		$("#data_ric").val(localStorage.data_ric)
+		$("#data_en").val(localStorage.data_en)
+		$("#stato_ric").val(localStorage.stato_ric)
+
+	}
+	
+	$('.cerca').on('change', function () {
+		localStorage.tipo_richiesta=$("#tipo_richiesta").val()	
+		localStorage.reparto=$("#reparto").val()	
+		localStorage.richiedente=$("#richiedente").val()	
+		localStorage.dipendente=$("#dipendente").val()	
+		localStorage.data_ric=$("#data_ric").val()	
+		localStorage.data_en=$("#data_en").val()	
+		localStorage.stato_ric=$("#stato_ric").val()	
+	})
+	
+	$( ".cerca" ).trigger( "change" ); 
 	  
 
     $('#example2').DataTable({
@@ -390,6 +430,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
       "autoWidth": false,
       "responsive": true,
     });
+
+	
   });
   
   function modifica(id) {

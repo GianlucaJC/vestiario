@@ -244,7 +244,7 @@
 										echo "<th>Taglia</th>";
 										echo "<th>ID fornitore</th>";
 										echo "<th>Qta richiesta</th>";
-										echo "<th>Qta impegno</th>";
+										//echo "<th>Qta impegno</th>";
 										echo "<th>Qta consegnata</th>";
 									echo "</tr>";
 							}
@@ -261,9 +261,11 @@
 								echo "<td>";
 									echo $load_old_request[$sca]['qta_richiesta'];
 								echo "</td>";
+								/*
 								echo "<td>";
 									echo $load_old_request[$sca]['qta_impegno'];
 								echo "</td>";
+								*/
 								echo "<td>";
 									echo $load_old_request[$sca]['qta_consegnata'];
 								echo "</td>";
@@ -278,17 +280,6 @@
 		  
 			?>
 
-				<span class="badge bg-success">
-					Giacenza reale
-				</span>		  
-				<span class="badge bg-secondary">
-					Q.ta impegnata
-				</span>
-				<span class="badge bg-primary">
-					Giacenza virtuale
-				</span>		
-
-				<hr>
 
 				<?php 
 					$stato=$load_richiesta[0]['stato'];
@@ -321,7 +312,7 @@
 
 						?>
 						<div class="row div_voce">
-						 <div class="col-md-3 col-sm-3 <?php echo $bordo;?>">
+						 <div class="col-md-6 col-sm-6 <?php echo $bordo;?>">
 							<div class="form-group">
 							<?php
 								echo "<input type='hidden' name='prodotto[]'  value='$descrizione_articolo'>";
@@ -386,20 +377,6 @@
 						</div>
 
 					
-
-
-						<div class="col-md-3 col-sm-3 <?php echo $bordo;?>">
-						  <!-- text input -->
-						  <div class="form-group">
-							<?php
-								if ($voci==0) echo "<label>Fornitore</label><br>";
-								echo stripslashes($fornitore);
-							?>	
-						  </div>
-						</div>				  
-
-
-
 						<?php 
 							$prod_prec=$prodotto_load;
 							$taglia_prec=$taglia_load;
@@ -418,24 +395,30 @@
 							<div class="col-md-2 col-sm-2 <?php echo $bordo;?>">
 							  <!-- text input -->
 							  <div class="form-group">
-								<?php if ($voci==0) echo "<label>Impegno</label><br>"; ?>
+								<?php if ($voci==0) echo "<label>Evasione</label><br>"; ?>
 								<span class="badge bg-success">
 									<?php 
 										echo $giacenza;
 									?>
 								</span>
 								
-								<span class="badge bg-secondary">
-									<?php echo $qta_impegno_cur;?>
-								</span>
+								<?php if (1==2) {?>
+									<span class="badge bg-secondary">
+										<?php echo $qta_impegno_cur;?>
+									</span>
 
-								<span class="badge bg-primary">
-									<?php 
-										echo $giacenza_impegno;
-									?>
-								</span>
+									<span class="badge bg-primary">
+										<?php 
+											echo $giacenza_impegno;
+										?>
+									</span>
+								<?php } ?>
 								
 								<input type='hidden' name='id_ref[]' value="<?php echo $id_ref; ?>">
+
+
+								<input type='hidden' value="<?php echo $giacenza; ?>" id='giacenza<?php echo $voci;?>' >
+								
 								<input type='hidden' name='giacenza_impegno[]' value="<?php echo $giacenza_impegno; ?>" id='giacenza_impegno<?php echo $voci;?>' >								
 								
 
@@ -483,7 +466,7 @@
 	if ($stato!="3") {?> 
 		<div class="row">			
 			<div class="col-md-4 col-sm-2">
-				<button type="button" class="btn btn-primary btn-md btn-block" onclick='save()'>Salva impegni</button>
+				<button type="button" class="btn btn-primary btn-md btn-block" onclick='save()'>Evadi quantità indicate</button>
 			</div>	
 
 			
@@ -510,6 +493,12 @@
 				</div>
 			
 		</div>
+		
+		
+			<a href="elenco.php?view=1">
+				<button type="button" class=" mt-2 btn btn-secondary btn-lg btn-block">Torna ad elenco impegni</button>
+			</a>	
+
 		
 					<!-- Sezione allegati in caso di PDF per DPI !-->
 						<div id='sez_allegati' style="display:none" class='mt-2'>
@@ -659,8 +648,31 @@
 <!-- fine upload -->
 <script>
 
-
 function save() {
+	num_elementi=$("#num_elementi").val();
+	sub=1;
+	for (sca=0;sca<=num_elementi-1;sca++) {
+		giacenza=$("#giacenza"+sca).val()
+		qta_impegno=$("#qta_impegno"+sca).val()
+		giacenza=parseInt(giacenza)
+		qta_impegno=parseInt(qta_impegno)
+		
+		if (giacenza.length==0) giacenza=0
+		if (qta_impegno.length==0) qta_impegno=0
+		st="";
+		$("#qta_impegno"+sca).css("border-color","")
+		if (giacenza<qta_impegno) {
+			sub=0
+			$("#qta_impegno"+sca).css("border-color","red")
+		}	
+		
+	}
+	$("#send_richiesta").val("SAVE")
+	if (sub==1) $("#frm_view").submit();
+	else alert("Controllare i campi evidenziati!");
+}
+
+function old_save() {
 	num_elementi=$("#num_elementi").val();
 	sub=1;
 	for (sca=0;sca<=num_elementi-1;sca++) {

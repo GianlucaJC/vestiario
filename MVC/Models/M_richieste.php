@@ -29,7 +29,12 @@ class Main_Richieste
 				$cond="ri.codice_articolo='$codice' and ri.taglia='$taglia'";
 			}
 		}	
-		else if (isset($_GET['view'])) $cond.=" and stato=".$_GET['view'];
+		else if (isset($_GET['view'])) {
+			if ($_GET['view']=='1') 
+				$cond.=" and (stato='0' or stato='1') ";
+			else	
+				$cond.=" and stato=".$_GET['view'];
+		}	
 		
 		/*
 		$sql="SELECT r.*,rep.reparto,ri.codice_articolo,ri.taglia,ri.qta_richiesta,ri.qta_impegno,u.operatore richiedente,di.dipendente dipendente from `richieste` r 
@@ -52,7 +57,7 @@ class Main_Richieste
 				WHERE $cond
 				GROUP BY r.id
 				ORDER BY r.data_richiesta desc,rep.reparto,operatore,dipendente";
-		
+	
 		$resp=array();
 		$result=$this->conn->query($sql);
 		$elem=0;

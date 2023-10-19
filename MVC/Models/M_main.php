@@ -125,7 +125,8 @@ class Main_Main
 			$sql="SELECT count(r.id) q 
 			FROM `vestiario`.`richieste` r 
 			INNER JOIN `vestiario`.dipendenti d ON r.id_dipendente=d.id 
-			WHERE r.stato='1' and r.id_reparto='$vest_id_rep' and r.id_sr='$vest_id_sr'";
+			WHERE (r.stato='0' or r.stato='1') and r.id_reparto='$vest_id_rep' and r.id_sr='$vest_id_sr'";
+	
 			$result = $this->conn->query($sql);
 			$row = $result->fetch_assoc();
 			$resp['view']=$row['q'];
@@ -144,7 +145,8 @@ class Main_Main
 			$row = $result->fetch_assoc();
 			$resp['new']=$row['q'];
 
-			$sql="SELECT count(id) q FROM `richieste` where stato='1'";
+			$sql="SELECT count(id) q FROM `richieste` where stato='0' or stato='1'";
+
 			$result = $this->conn->query($sql);
 			$row = $result->fetch_assoc();
 			$resp['view']=$row['q'];
@@ -154,6 +156,7 @@ class Main_Main
 			$row = $result->fetch_assoc();
 			$resp['close']=$row['q'];
 		}	
+		
 		
 		return $resp;
 	

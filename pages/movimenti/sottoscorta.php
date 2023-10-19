@@ -168,9 +168,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
                     <th>Prodotto</th>
 					<th>Taglia</th>
 					<th>Fornitore</th>
-					<th>Giacenza reale</th>
+					<th>Giacenza</th>
 					<th>Totale da richieste in corso</th>
-					<th>Giacenza impegno</th>
+				
 					<th>Sottoscorta</th>
                   </tr>
                   </thead>
@@ -195,7 +195,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 									echo "<td>$fornitore</td>";
 									echo "<td>$giacenza</td>";
 									echo "<td>$qta_req</td>";
-									echo "<td>$giacenza_impegno</td>";
+									
 									echo "<td>$sottoscorta</td>";
 								echo "</tr>";
 								
