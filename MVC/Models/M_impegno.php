@@ -165,6 +165,8 @@ class Main_Impegno
 			}
 		}
 
+		$sql="UPDATE richieste set stato=1 WHERE id=$id_richiesta";
+		$result=$this->conn->query($sql);
 	
 		
 		return $check;
@@ -180,7 +182,6 @@ class Main_Impegno
 	}
 	
 	public function close_richiesta($id_richiesta) {
-		$testo_doc=addslashes($testo_doc);
 		$sql="UPDATE richieste set stato=3 WHERE id=$id_richiesta";
 		$result=$this->conn->query($sql);
 	}	
