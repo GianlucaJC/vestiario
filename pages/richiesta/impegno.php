@@ -172,7 +172,7 @@
 
 		<?php if ($save_impegni['check']=="1") {?>
 			<div class="alert alert-success" role="alert">
-			  <b>Operazione completata con successo</b>. Impegni aggiornati.
+			  <b>Operazione completata con successo</b>. Quantità aggiornate.
 			</div>	 
 		<?php } 
 		else  {?>
@@ -369,9 +369,9 @@
 									if (strlen($qta_consegnata)!=0 && $qta_consegnata!="0")
 										echo " ($qta_consegnata evaso/i)";
 								}	
-								else 
-																															if (strlen($qta_consegnata)!=0 && $qta_consegnata!="0") 
-																																echo " ($qta_consegnata evaso/i)";
+								else
+								  if (strlen($qta_consegnata)!=0 && $qta_consegnata!="0")
+								    echo " ($qta_consegnata evaso/i)";
 							?>	
 						  </div>
 						</div>
@@ -426,7 +426,7 @@
 									$ro="";
 									if ($stato=="3") $ro="readonly";
 								?>
-								<input type="text" class="form-control" style='<?php echo $st;?>' placeholder="QTA impegno" name="qta_impegno[]" id='qta_impegno<?php echo $voci;?>'  <?php echo $ro; ?>>
+								<input type="text" class="form-control" style='<?php echo $st;?>' placeholder="QTA da evedare" name="qta_impegno[]" id='qta_impegno<?php echo $voci;?>'  <?php echo $ro; ?>>
 							  </div>
 							</div>							
 						
@@ -463,6 +463,13 @@
 
 
 <?php 
+	if ($stato=="3") {?>
+					
+			<a href="elenco.php?view=1">
+				<button type="button" class=" mt-2 btn btn-secondary btn-lg btn-block">Torna ad elenco impegni</button>
+			</a>		
+		
+	<?php }
 	if ($stato!="3") {?> 
 		<div class="row">			
 			<div class="col-md-4 col-sm-2">
@@ -494,10 +501,16 @@
 			
 		</div>
 		
+			<a href="javascript:void(0)">
+				<button type="submit" name='close_r' onclick='closeric()' class=" mt-4 btn btn-success btn-lg btn-block" value='close'>Imposta stato richiesta conclusa</button>
+			</a>	
+		
 		
 			<a href="elenco.php?view=1">
 				<button type="button" class=" mt-2 btn btn-secondary btn-lg btn-block">Torna ad elenco impegni</button>
 			</a>	
+
+
 
 		
 					<!-- Sezione allegati in caso di PDF per DPI !-->
@@ -651,6 +664,7 @@
 function save() {
 	num_elementi=$("#num_elementi").val();
 	sub=1;
+	/*disattivato controllo giacenza
 	for (sca=0;sca<=num_elementi-1;sca++) {
 		giacenza=$("#giacenza"+sca).val()
 		qta_impegno=$("#qta_impegno"+sca).val()
@@ -667,6 +681,7 @@ function save() {
 		}	
 		
 	}
+	*/
 	$("#send_richiesta").val("SAVE")
 	if (sub==1) $("#frm_view").submit();
 	else alert("Controllare i campi evidenziati!");
@@ -720,27 +735,15 @@ function allega() {
 	$("#testo_doc").prop("readonly", true);
 }
 function consegna() {
-	num_elementi=$("#num_elementi").val();
-	sub=1;
-	for (sca=0;sca<=num_elementi-1;sca++) {
-		giacenza_impegno=$("#giacenza_impegno"+sca).val()
-		qta_impegno=$("#qta_impegno"+sca).val()
-		giacenza_impegno=parseInt(giacenza_impegno)
-		qta_impegno=parseInt(qta_impegno)
-		
-		if (giacenza_impegno.length==0) giacenza_impegno=0
-		if (qta_impegno.length==0) qta_impegno=0
-		st="";
-		$("#qta_impegno"+sca).css("border-color","")
-		if (giacenza_impegno<qta_impegno) {
-			sub=0
-			$("#qta_impegno"+sca).css("border-color","red")
-		}	
-		
-	}
+
 	$("#send_consegna").val("consegna")
-	if (sub==1) $("#frm_view").submit();
-	else alert("Controllare i campi evidenziati!");
+	$("#frm_view").submit();
+	
+}
+
+function closeric() {
+	if (!confirm("Sicuri di chiudere la richiesta?")) 
+		 event.preventDefault()
 }
 
 

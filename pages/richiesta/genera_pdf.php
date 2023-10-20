@@ -237,19 +237,10 @@ if (!file_exists($filename)) {
 						$tipo_richiesta=$load_richiesta[0]['tipo_richiesta'];
 						$id_dipendente=$load_richiesta[0]['id_dipendente'];
 						$nominativo=$load_richiesta[0]['dipendente'];
-						$codice_articolo=$_POST['codice_articolo'];
-						$quantita=$_POST['qta_impegno'];
-						$taglie=$_POST['taglia'];
-						$prodotto=$_POST['prodotto'];
-						$qta_impegno_cur=$_POST['qta_impegno_cur'];
-						
-						
 						
 						
 						
 						$pdf = new PDF('P', 'mm');
-
-						
 						$pdf->SetTextColor(0,0,0);  ////imposta testo nero
 						$pdf->SetFont('Times','B',10);							
 						$pdf->AddPage();
@@ -278,26 +269,13 @@ if (!file_exists($filename)) {
 						$pdf->Cell(40,6,"QUANTITA'/TAGLIA",1,0,'C',1);
 						$pdf->Cell(65,6,'CONSEGNATO DATA',1,1,'C',1);
 						
+						$codice_articolo=$_POST['codice_articolo'];
+						$quantita=$_POST['qta_impegno'];
+						$taglie=$_POST['taglia'];
+						$prodotto=$_POST['prodotto'];
+						$qta_impegno_cur=$_POST['qta_impegno_cur'];
+												
 						
-						
-						//accorpamento degli eventuali codici duplicati a causa di più fornitori
-						$info=array();
-						for ($ind=0;$ind<=count($codice_articolo)-1;$ind++) {
-							$codice=stripslashes($codice_articolo[$ind]);
-							$taglia=$taglie[$ind];
-							//$qt=$quantita[$ind];
-							$qt=$qta_impegno_cur[$ind];
-							
-							$articolo=$prodotto[$ind];
-							$info[$codice]['quantita']+=$qt;
-							$info[$codice]['taglia']=$taglia;
-							$info[$codice]['articolo']=$articolo;
-							
-							
-							
-						}
-						
-						//for ($ind=0;$ind<=count($codice_articolo)-1;$ind++) {
 						$data=date("d-m-Y");
 						
 						
@@ -311,14 +289,17 @@ if (!file_exists($filename)) {
 						$f_jpeg=str_replace(".png",".jpg",$filename);
 						imagejpeg($bg, $f_jpeg, $quality);
 						imagedestroy($bg);			
-						$genera=99;
-						foreach ($info as $codice=>$v) {
-							$qt=$info[$codice]['quantita'];
+						//$genera=99;
+						$genera=1;
+
+						$da_firmare=$main_impegno->product_to_sign($impegno);						
+						for ($sca=0;$sca<=count($da_firmare)-1;$sca++) {
+							$qt=$da_firmare[$sca]['quantita'];
 							if ($qt=="0" || strlen($qt)==0) continue;
-							$genera=1;
-							$articolo=$info[$codice]['articolo'];
-							$qt=$info[$codice]['quantita'];
-							$tg=$info[$codice]['taglia'];
+							
+							$id_sign=$da_firmare[$sca]['id'];
+							$articolo=$da_firmare[$sca]['codice_articolo'];
+							$tg=$da_firmare[$sca]['taglia'];
 							$x=$pdf->getX();$y=$pdf->getY();
 							$pdf->MultiCell(55,4,$articolo,1,'J');
 							$x1=$pdf->getX();$y1=$pdf->getY();
@@ -332,6 +313,7 @@ if (!file_exists($filename)) {
 							$pdf->Cell(40,$hx,$qt_tg,1,0,'C',1);						
 							$pdf->Cell(65,$hx,$data,1,1,'C',1);	
 							
+							$delete_after_sign=$main_impegno->delete_after_sign($id_sign);
 							
 						}
 						

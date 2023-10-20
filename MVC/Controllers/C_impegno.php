@@ -12,13 +12,18 @@
 
 
 	$impegno=$_POST['impegno'];
+	
+	$close_r=$_POST['close_r'];
+	if ($close_r=="close") {
+		$close=$main_impegno->close_richiesta($impegno);
+	}
 	$testo_doc="No testo";
 	if (isset($_POST['testo_doc'])) $testo_doc=$_POST['testo_doc'];
 	$load_richiesta=array();
 	if (strlen($impegno)!=0) {
 		$load_richiesta=$main_impegno->load_richiesta($impegno);
 	}
-	
+
 	
 	$send_consegna=$_POST['send_consegna'];
 	$nofirma=0;$file_pdf="";$genera=0;

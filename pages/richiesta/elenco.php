@@ -224,7 +224,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 											if ($elenco[$sca]['id_richiedente']==$id_user || $is_admin==1) {
 												echo "<a href='javascript:void(0)'  onclick=\"elimina(".$elenco[$sca]['id'].")\">";
 													echo "<font size=5 color='red'>";
-														echo "<i class='fas fa-trash-alt ml-2'></i>";
+														echo "<i class='fas fa-trash-alt ml-5'></i>";
 													echo "</font>";
 												echo "</a>";
 											}

@@ -112,13 +112,38 @@ class Main_Impegno
 			return $check;
 		}
 		
+		$codice_articolo=$_POST['codice_articolo'];		
+		$taglia=$_POST['taglia'];		
+		$quantita=$_POST['qta_impegno'];
+
 		$id_prodotto_a=$_POST['id_prodotto'];
 		$id_ref_a=$_POST['id_ref'];
 		$qta_impegno_a=$_POST['qta_impegno'];
+		$id_refx=$id_ref_a[0];
+		$sql="SELECT id_richiesta FROM `richieste_items` WHERE id=$id_refx ";
+		$result = $this->conn->query($sql);
+		$row = $result->fetch_assoc();
+		$id_richiesta=$row['id_richiesta'];
+		
 		for ($sca=0;$sca<=count($id_ref_a)-1;$sca++) {
+			$qta_impegno=$qta_impegno_a[$sca];
+			
+			/*
+				Inserisco gli elementi da evadere nella tabella
+				utile alla firma (gli elementi saranno eliminati dopo la firma)
+			*/
+			if (strlen($qta_impegno)!=0) {
+				$sql="INSERT INTO richieste_da_firmare 
+						(`id_richiesta`,`codice_articolo`,`quantita`,`taglia`) 
+						VALUES
+						($id_richiesta,'".$codice_articolo[$sca]."',".$qta_impegno_a[$sca].",'".$taglia[$sca]."')";
+				
+				$result=$this->conn->query($sql);			
+			}
+			
 			$id_prodotto=$id_prodotto_a[$sca];
 			$id_ref=$id_ref_a[$sca];
-			$qta_impegno=$qta_impegno_a[$sca];
+			
 			if (strlen($qta_impegno)!=0) {
 				$sql="UPDATE prodotti SET giacenza=giacenza-$qta_impegno WHERE id=$id_prodotto";
 				$result=$this->conn->query($sql);
@@ -132,23 +157,15 @@ class Main_Impegno
 				if (strlen($storia_old)!=0) $storia="$storia_old,$qta_impegno";
 				//aggiornamento quantità impegni su tabella richieste_items
 				$sql="UPDATE `richieste_items`
-						SET qta_impegno=qta_impegno+$qta_impegno,storia='$storia' 
+						SET qta_consegnata=qta_consegnata+$qta_impegno,storia='$storia' 
 						WHERE id=$id_ref";
 
 				$result=$this->conn->query($sql);
 
 			}
 		}
-		
-		$id_refx=$id_ref_a[0];
-		$sql="SELECT id_richiesta FROM `richieste_items` WHERE id=$id_refx ";
-		$result = $this->conn->query($sql);
-		$row = $result->fetch_assoc();
-		$id_richiesta=$row['id_richiesta'];
-		
-		$sql="UPDATE `richieste` SET stato=1 WHERE id=$id_richiesta and stato=0";
-		$result=$this->conn->query($sql);
-		
+
+	
 		
 		return $check;
 	}
@@ -160,44 +177,31 @@ class Main_Impegno
 				VALUES 
 				($id_dipendente,'$filename', '$testo_doc', '$tipo_richiesta')";
 		$result=$this->conn->query($sql);
-		$sql="UPDATE `richieste_items` SET qta_consegnata=qta_consegnata+qta_impegno,qta_impegno=0 WHERE id_richiesta=$id_ref";
-		
+	}
+	
+	public function close_richiesta($id_richiesta) {
+		$testo_doc=addslashes($testo_doc);
+		$sql="UPDATE richieste set stato=3 WHERE id=$id_richiesta";
 		$result=$this->conn->query($sql);
+	}	
 
-		/* vecchia procedura com impegni
-		// ora viene aggiornato subito la giacenza in save_impegni()
-		//dopo la firma-consegna, azzero gli impegni
-		
-		//Aggiornamento Giacenza REALE da giacenza virtuale
-		$sql="UPDATE `prodotti` p
-				INNER JOIN `richieste_items` r ON p.codice_fornitore=r.codice_articolo and p.taglia=r.taglia and p.id_fornitore=r.id_fornitore
-				SET p.giacenza=p.giacenza_impegno
-				WHERE r.id_richiesta=$id_ref";
+	public function product_to_sign($id_richiesta) {
+		$sql="SELECT id,codice_articolo,sum(quantita) quantita,taglia 
+				FROM `richieste_da_firmare` 
+				WHERE id_richiesta=$id_richiesta
+				GROUP BY codice_articolo";
 		$result=$this->conn->query($sql);
-		*/
-		
-		//verifica se la richiesta è conclusa
-		$sql="SELECT codice_articolo,taglia,qta_consegnata, qta_richiesta FROM `richieste_items` WHERE id_richiesta=$id_ref";
-		$result=$this->conn->query($sql);
-		$tot_cons=0;
-		$arr=array();
+		$resp=array();
 		while($results = $result->fetch_assoc()){
-			$tot_cons+=$results['qta_consegnata'];
-			$qta_richiesta=$results['qta_richiesta'];
-
-			$codice_articolo=$results['codice_articolo'];
-			$taglia=$results['taglia'];
-			$codice=$codice_articolo.$taglia;
-			$arr[$codice]=$qta_richiesta;
-		}	
-		$tot_rich=0;
-		foreach($arr as $k=>$v) {
-			$tot_rich+=$arr[$k];
+			$resp[]=$results;
 		}
-		if ($tot_cons==$tot_rich) {
-			$sql="UPDATE richieste SET stato=3 WHERE id=$id_ref";
-			$result = $this->conn->query($sql);
-		}
+		return $resp;		
+	}
+	
+	public function delete_after_sign($id) {
+		$sql="DELETE FROM `richieste_da_firmare` WHERE id=$id";
+		$result=$this->conn->query($sql);
+		return array("status"=>"OK");	
 	}
 
 }

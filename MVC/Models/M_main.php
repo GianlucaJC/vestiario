@@ -203,7 +203,7 @@ class Main_Main
 		$result = $this->conn->query($sql);
 		$row = $result->fetch_assoc();
 		$q=$row['q'];
-		if ($q==$qta_richiesta) return "1";
+		if ($q>=$qta_richiesta) return "1";
 		else return 0;
 	}
 
