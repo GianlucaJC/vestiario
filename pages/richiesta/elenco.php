@@ -144,7 +144,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 					  <thead>
 					  <tr>
 						<th>Delete</th>
-						<th>#</th>
+						<th style='max-width:70px'>#</th>
 						<th id='tipor'>Tipo Richiesta</th>
 						<?php if ($is_admin==1) {?>
 							<th>Reparto</th>
@@ -180,7 +180,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 									echo "</td>";
 
 								
-									echo "<td style='text-align:center'><i>".($sca+1)."</i></td>";
+									echo "<td style='text-align:center;max-width:70px'><i>".($sca+1)."</i></td>";
 									echo "<td>";
 										echo $elenco[$sca]['tipo_richiesta'];
 									echo "</td>";
@@ -241,7 +241,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 						?>
 					  </tbody>
 					  <tfoot>
-
+						<th style='max-width:70px'></th>
 						<th></th>
 						<th>Tipo Richiesta</th>
 						<?php if ($is_admin==1) {?>
