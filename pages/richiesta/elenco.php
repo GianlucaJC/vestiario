@@ -143,6 +143,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 	
 					  <thead>
 					  <tr>
+						<th>Delete</th>
 						<th>#</th>
 						<th id='tipor'>Tipo Richiesta</th>
 						<?php if ($is_admin==1) {?>
@@ -166,6 +167,19 @@ scratch. This page gets rid of all links and provides the needed markup only.
 						
 							for ($sca=0;$sca<=count($elenco)-1;$sca++) {
 								echo "<tr>";
+									echo "<td>";
+										if ($stato!=3) {
+											if ($elenco[$sca]['id_richiedente']==$id_user || $is_admin==1) {
+												echo "<a href='javascript:void(0)'  onclick=\"elimina(".$elenco[$sca]['id'].")\">";
+													echo "<font size=5 color='red'>";
+														echo "<i class='fas fa-trash-alt '></i>";
+													echo "</font>";
+												echo "</a>";
+											}
+										}									
+									echo "</td>";
+
+								
 									echo "<td style='text-align:center'><i>".($sca+1)."</i></td>";
 									echo "<td>";
 										echo $elenco[$sca]['tipo_richiesta'];
@@ -220,15 +234,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 										
 									
 									
-										if ($stato!=3) {
-											if ($elenco[$sca]['id_richiedente']==$id_user || $is_admin==1) {
-												echo "<a href='javascript:void(0)'  onclick=\"elimina(".$elenco[$sca]['id'].")\">";
-													echo "<font size=5 color='red'>";
-														echo "<i class='fas fa-trash-alt ml-5'></i>";
-													echo "</font>";
-												echo "</a>";
-											}
-										}
+
 									
 								echo "</tr>";
 							}
