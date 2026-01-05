@@ -19,6 +19,9 @@ nbproject/private
 node_modules/
 bower_components/
 
+pages/dipendenti/info/abb/*.*
+pages/dipendenti/info/dpi/*.*
+pages/prodotti/files/*.*
 # Plugins
 /plugins/**/*.html
 /plugins/**/*.less

@@ -15,6 +15,112 @@ class Main_Main
 		$ora = date('H:i:s', time());
 		$user=$_POST['user'];
 		$pass=$_POST['pass'];
+		
+		// Rilevamento ambiente (Locale vs Produzione)
+		$whitelist_local = ['127.0.0.1', '::1', 'localhost'];
+
+		if (in_array($_SERVER['SERVER_NAME'], $whitelist_local)) {
+			// URL Locale (XAMPP) - Aggiungi la porta se necessario (es: localhost:8012)
+			$apiUrl = 'https://localhost:8012/api_user_liof/api_login.php';
+		} else {
+			// URL Produzione
+			$apiUrl = 'http://liojls02.ad.liofilchem.net:8012/api_user_liof/api_login.php';
+		}
+
+		$apiSecret = "StringaSegretaMoltoLunga123!"; // Deve essere identica a quella nel file api_login.php
+
+		// --- FINE CONFIGURAZIONE ---
+
+
+		if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+			// Dati da inviare
+			$data = array(
+				'api_token' => $apiSecret,
+				'username'  => $user,
+				'password'  => $pass,
+				'app_name'  => 'NC'
+			);
+
+			// Setup cURL
+			$ch = curl_init($apiUrl);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch, CURLOPT_POST, true);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+			curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+				'Content-Type: application/json'
+			));
+
+			// Disabilita verifica SSL (necessario in locale con certificati self-signed)
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+
+			// Esecuzione
+			$response = curl_exec($ch);
+			$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+			$curlError = curl_error($ch);
+			curl_close($ch);
+
+			$rows=array();
+			// --- ANALISI RISULTATI ---
+			if ($curlError) {
+				$rows['header']['login']="KO";	
+				$rows['header']['error']="ERRORE CURL (Connessione fallita).";
+				return $rows;
+			}
+
+			// Decodifica JSON per vedere se la logica funziona
+			$json = json_decode($response, true);
+			if ($httpCode == 200 && isset($json['success'])) {
+				
+				if ($json['success'] === true && $json['nc_access']>0) {
+					//recupero altre info (tramite sql vecchio login)
+					$sql ="SELECT userid,passkey,operatore,u.id,vest_access,vest_id_rep,vest_id_sr,r.reparto,sr.reparto sotto_reparto FROM `Sql58368_4`.`utenti` u
+					INNER JOIN `vestiario`.`reparti` r ON u.vest_id_rep=r.id
+					INNER JOIN `vestiario`.`sotto_reparti` sr ON u.vest_id_sr=sr.id
+					WHERE userid='$user' and passkey='$pass' and vest_access is not null;";
+					$descr_reparto="N.D.";$descr_sr="N.D.";
+	
+					if ($result = $this->conn->query($sql)) {
+						$row_cnt = $result->num_rows;
+						if ($row_cnt==1) {
+							$res = $result->fetch_row();
+							$descr_reparto=$res[7];
+							$descr_sr=$res[8];
+						}
+					}
+
+					$rows=array();
+					$rows['header']['error']="";
+					$_SESSION['user_vest'] = $user;
+					$_SESSION['id_user_vest'] = $json['id'];
+					$_SESSION['operatore_vest'] = $json['operatore'];
+					$_SESSION['vest_access'] = $json['vest_access'];
+					$_SESSION['vest_id_rep'] = $json['vest_id_rep'];
+					$_SESSION['vest_id_sr'] = $json['vest_id_sr'];
+					$_SESSION['descr_reparto'] = $descr_reparto;
+					$_SESSION['descr_sr'] = $descr_sr;
+					
+					$rows['header']['login']="OK";
+				
+				} else {
+					$rows['header']['login']="KO";	
+					$rows['header']['error']=$json['message'];
+				}
+			} else {
+					$rows['header']['login']="KO";	
+					$rows['header']['error']="Il server ha risposto, ma non è un JSON valido o c'è un errore server (500).";
+			}
+		}
+				
+		return $rows;
+	}
+		
+	public function old_login() {
+		$datx=date("Y-m-d");
+		$ora = date('H:i:s', time());
+		$user=$_POST['user'];
+		$pass=$_POST['pass'];
 		$sql ="SELECT userid,passkey,operatore,u.id,vest_access,vest_id_rep,vest_id_sr,r.reparto,sr.reparto sotto_reparto FROM `Sql58368_4`.`utenti` u
 		INNER JOIN `vestiario`.`reparti` r ON u.vest_id_rep=r.id
 		INNER JOIN `vestiario`.`sotto_reparti` sr ON u.vest_id_sr=sr.id
